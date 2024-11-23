@@ -2,7 +2,7 @@ from .base_update import BaseUpdate
 
 
 class VectorUpdate(BaseUpdate):
-    def update(self, entry, metadata=None, **kwargs):
+    def update(self, entry, metadata=None, doc_id=None, **kwargs):
         """
         Stores an embedding in the vector database.
 
@@ -10,4 +10,4 @@ class VectorUpdate(BaseUpdate):
             entry: The embedding to store.
             metadata (dict): Optional metadata associated with the embedding.
         """
-        self.db.update(entry, metadata)
+        self.db.update(entry, metadata, doc_id, **kwargs)

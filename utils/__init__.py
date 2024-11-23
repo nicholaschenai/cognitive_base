@@ -13,6 +13,7 @@ import logging
 import pdb
 import traceback
 import json
+import textwrap
 
 from pprint import pp
 from rich.console import Console
@@ -68,7 +69,7 @@ def str_from_msg(msg, return_type):
         dict_str = ''
         for tool_call in tool_calls:
             dict_str += json.dumps(tool_call['args'], indent=4)
-
+        logger.info(dict_str)
         return dict_str
 
 
@@ -137,7 +138,6 @@ def parse_retry_loop(
     - dict or tuple: The parsed result, optionally with messages.
     """
     parsed_result = fallback if (fallback is not None) else {}
-    parse_success = False
 
     for i in range(parse_tries):
         if verbose:
@@ -169,14 +169,14 @@ def parse_retry_loop(
                 parsed_result = parse_fn(ai_message, parser=parser)
             else:
                 parsed_result = parse_fn(ai_message)
-            parse_success = True
             break
         except Exception as e:
             error_msg = f"Error during parsing! {str(e)}, {type(e).__name__}\n"
             logger.warning(error_msg)
             messages.append(HumanMessage(content=error_msg))
-    if not parse_success:
+    else:
         logger.error(f'All parse attempts failed')
+        
     if return_messages:
         return {'parsed_result': parsed_result, 'messages': messages}
     return parsed_result
@@ -430,6 +430,16 @@ def load_json(*file_path, **kwargs):
 
 
 def truncate_str(s, max_length=300):
+    """
+    Truncate a string to a maximum length, appending '...' if truncated.
+
+    Parameters:
+    s (str): The string to be truncated.
+    max_length (int, optional): The maximum length of the truncated string including the ellipsis. Defaults to 300.
+
+    Returns:
+    str: The truncated string with '...' appended if it exceeds the maximum length.
+    """
     if len(s) > max_length:
         return s[:max_length - 3] + '...'
     return s
@@ -485,3 +495,21 @@ def get_cls(component):
     print(f'getting and building cls {class_name} from {module_name}')
     cls = getattr(module, class_name)
     return cls
+
+
+tag_indent_template = """
+[{tag}]:
+{data}
+[/{tag}]
+"""
+
+
+def tag_indent_format(tag, data_list, label=False, idx=1, label_name='Document'):
+    final_str = ''
+    for data in data_list:
+        final_str += tag_indent_template.format(
+            tag=tag + (f' ({label_name} {idx})' if label else ''),
+            data=textwrap.indent(str(data), '    ')
+        )
+        idx += 1
+    return final_str

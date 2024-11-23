@@ -46,14 +46,14 @@ class ChromaVectorDB(BaseVectorDB):
             list: A list of documents retrieved from the database.
         """
 
-        k = min(self.db.count(), k)
+        k = min(self.count(), k)
         docs = []
         if k:
             logger.info(f"\033[33m Retrieving {k} entries for db: {self.db_name} \n \033[0m")
             docs = self.db.similarity_search(query, k=k)
         return docs
 
-    def update(self, entry, metadata=None, **kwargs):
+    def update(self, entry, metadata=None, doc_id=None, **kwargs):
         """
         Stores an embedding in the vector database.
 
@@ -61,5 +61,8 @@ class ChromaVectorDB(BaseVectorDB):
             entry: The embedding to store.
             metadata (dict): Optional metadata associated with the embedding.
         """
-        self.db.add_texts(texts=[entry], metadatas=[metadata])
+        # Note: this is upsert
+        # Note: if not specified, ids will be uuid4 which is not deterministic
+        ids = self.db.add_texts(texts=[entry], metadatas=[metadata], ids=[doc_id], **kwargs)
         self.db.persist()
+        return ids

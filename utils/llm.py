@@ -5,6 +5,10 @@ import ast
 import os
 
 from langchain_openai import AzureChatOpenAI, ChatOpenAI, AzureOpenAIEmbeddings, OpenAIEmbeddings
+from langchain.embeddings import CacheBackedEmbeddings
+from langchain.storage import LocalFileStore
+
+from ..utils import f_mkdir
 
 
 def get_model_params(
@@ -66,7 +70,7 @@ def get_chat_model():
         return ChatOpenAI
 
 
-def get_embedding_fn():
+def get_embedding_fn(store_location="./lm_cache/embeddings"):
     """
     Determines the embedding function based on the environment configuration.
 
@@ -77,9 +81,17 @@ def get_embedding_fn():
         function: The embedding function, either AzureOpenAIEmbeddings or OpenAIEmbeddings.
     """
     if os.getenv("AZURE_OPENAI_ENDPOINT"):
-        return AzureOpenAIEmbeddings()
+        underlying_embeddings = AzureOpenAIEmbeddings()
     else:
-        return OpenAIEmbeddings()
+        underlying_embeddings = OpenAIEmbeddings()
+    
+    f_mkdir(store_location)
+    store = LocalFileStore(store_location)
+    cached_embedder = CacheBackedEmbeddings.from_bytes_store(
+        underlying_embeddings, store, namespace=underlying_embeddings.model, query_embedding_cache=True
+    )
+
+    return cached_embedder
 
 
 def construct_chat_model(

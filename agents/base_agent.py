@@ -3,7 +3,7 @@ import logging
 # TODO: have a feeling this is circular import
 from agent_expt_suite.envs import env_globals
 
-from ..utils.log import train_ckpt
+from ..utils.log import train_ckpt, move_log_file, construct_task_folder
 
 logger = logging.getLogger("logger")
 
@@ -136,6 +136,9 @@ class BaseAgent:
             self.train_step()
 
             # postprocessing
+            task_folder = construct_task_folder(self.args['result_dir'], 'train', self.task_id)
+            move_log_file(f"{task_folder}/logfile.log", self.args['result_dir'])
+
             self.train_iter += 1
             train_ckpt(self)
             if self.verbose:

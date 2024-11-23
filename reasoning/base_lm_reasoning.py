@@ -97,11 +97,45 @@ class BaseLMReasoning:
     # TODO: eventually deprecate this when refactor legacy code
     @staticmethod
     def extract_blocks(text, identifier=''):
+        """
+        Extracts blocks of text (triple backticks) based on a given identifier.
+
+        Args:
+            text (str): The input text from which blocks are to be extracted.
+            identifier (str, optional): The identifier used to determine the start of a block. Defaults to ''. (the word right after the first triple backtick)
+
+        Returns:
+            list: A list of extracted text blocks.
+        """
         return extract_blocks(text, identifier)
 
     @staticmethod
     def construct_messages(sys_template, human_template, sys_vars=None, human_vars=None, parser=None):
+        """
+        Constructs a list of message threads based on system and human templates and their respective variables. If either the system or human variables are lists, the method constructs multiple message threads.
+        Args:
+            sys_template (str): The template for the system message.
+            human_template (str): The template for the human message.
+            sys_vars (dict or list of dict, optional): Variables to format the system template. Can be a single dictionary or a list of dictionaries.
+            human_vars (dict or list of dict, optional): Variables to format the human template. Can be a single dictionary or a list of dictionaries.
+            parser (optional): An optional parser object that provides format instructions if required by the system template.
+        Returns:
+            list: A list of message threads, where each thread is a list containing a system message and a human message.
+        Raises:
+            AssertionError: If 'format_instructions' is required by the system template but not provided in sys_vars or parser.
+            AssertionError: If sys_vars and human_vars are lists of different lengths.
+        """
         def create_message_thread(single_sys_vars, single_human_vars):
+            """
+            Creates a message thread consisting of a system message and a human message.
+            Args:
+                single_sys_vars (dict): Variables to format the system message template. If None, an empty dictionary is used.
+                single_human_vars (dict): Variables to format the human message template. If None, the human message template is used as is.
+            Returns:
+                list: A list containing the formatted system message and human message.
+            Raises:
+                AssertionError: If 'format_instructions' is expected in the system template but not found in the variables or parser.
+            """
             if single_sys_vars or ('{format_instructions}' in sys_template):
                 sys_prompt_template = SystemMessagePromptTemplate.from_template(sys_template)
                 if single_sys_vars is None:
