@@ -13,9 +13,11 @@ from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTem
 
 from pprint import pp
 
-from ..utils import parse_retry_loop, pydantic_parse_fn, async_parse_retry_loop
-from ..utils.llm import construct_chat_model
 from ..knowledge_sources.parsers import extract_blocks
+
+from ..utils import pydantic_parse_fn
+from ..utils.llm import construct_chat_model
+from ..utils.retry_loops import async_parse_retry_loop, parse_retry_loop
 
 
 class BaseLMReasoning:
@@ -38,16 +40,16 @@ class BaseLMReasoning:
         lm_reason(sys_template, human_template, ...): Performs reasoning by calling the LM with provided templates and parsing the output.
     """
     def __init__(
-            self,
-            model_name="gpt-3.5-turbo",
-            temperature=0,
-            request_timeout=120,
-            verbose=True,
-            callbacks=None,
-            debug_mode=False,
-            name='base_reasoning',
-            parallel_api=False,
-            **kwargs,
+        self,
+        model_name="gpt-3.5-turbo",
+        temperature=0,
+        request_timeout=120,
+        verbose=True,
+        callbacks=None,
+        debug_mode=False,
+        name='base_reasoning',
+        parallel_api=False,
+        **kwargs,
     ):
         """
         Initializes the BaseLMReasoning class with a specified language model and configuration settings.
@@ -174,22 +176,22 @@ class BaseLMReasoning:
 
     # TODO: allow LCEL (so can parallel chain)
     def lm_reason(
-            self,
-            sys_template='',
-            human_template='',
-            parse_fn=None,
-            llm=None,
-            sys_vars=None,
-            human_vars=None,
-            parse_tries=3,
-            fallback=None,
-            parser=None,
-            return_messages=False,
-            return_json=False,
-            pydantic_model=None,
-            messages=None,
-            structured=False,
-            messages_list=None,
+        self,
+        sys_template='',
+        human_template='',
+        parse_fn=None,
+        llm=None,
+        sys_vars=None,
+        human_vars=None,
+        parse_tries=3,
+        fallback=None,
+        parser=None,
+        return_messages=False,
+        return_json=False,
+        pydantic_model=None,
+        messages=None,
+        structured=False,
+        messages_list=None,
     ):
         """
         Performs reasoning by interacting with the language model using provided templates.
@@ -280,17 +282,17 @@ class BaseLMReasoning:
 
     # TODO: eventually deprecate below for having lm_reason with structured=True
     def structured_lm_reason(
-            self,
-            sys_template='',
-            human_template='',
-            parse_fn=pydantic_parse_fn,
-            llm=None,
-            sys_vars=None,
-            human_vars=None,
-            fallback=None,
-            pydantic_model=None,
-            messages=None,
-            **kwargs,
+        self,
+        sys_template='',
+        human_template='',
+        parse_fn=pydantic_parse_fn,
+        llm=None,
+        sys_vars=None,
+        human_vars=None,
+        fallback=None,
+        pydantic_model=None,
+        messages=None,
+        **kwargs,
     ):
         """
         LM reason with structured output.

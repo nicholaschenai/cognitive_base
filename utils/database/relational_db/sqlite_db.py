@@ -3,7 +3,7 @@ import sqlite3
 import pandas as pd
 
 from .base_relational_db import BaseRelationalDB
-from cognitive_base.utils import truncate_str
+from ...formatting import truncate_str
 
 
 class SQLiteDB(BaseRelationalDB):

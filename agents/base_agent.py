@@ -1,7 +1,8 @@
 import logging
 
-# TODO: have a feeling this is circular import
-from agent_expt_suite.envs import env_globals
+from argparse import Namespace
+from typing import Dict, Any
+from tqdm import tqdm
 
 from ..utils.log import train_ckpt, move_log_file, construct_task_folder
 
@@ -38,8 +39,8 @@ class BaseAgent:
         train_step(): Abstract method for implementing a single training step.
         train_loop(): Abstract method for implementing the training loop.
     """
-    def __init__(self, args, components, handler):
-        # params
+    def __init__(self, args: Namespace, components: Dict[str, Any], handler: Any):
+        # misc args
         self.args = vars(args)
 
         # logging
@@ -53,11 +54,13 @@ class BaseAgent:
         self.task_id = None
         self.train_iter = 0
         self.attr_to_save = ['train_iter', 'task', 'task_id']
+        self.result_dir = args.result_dir
 
         # eval
         self.train = True
         self.eval_later = args.eval_later
         self.use_public_tests = args.use_public_tests
+        self.env_interface = None
 
         # debug n print
         self.debug_mode = args.debug_mode
@@ -107,7 +110,8 @@ class BaseAgent:
         self.handler.task_id = task_id
         self.task_id = task_id
         self.task = full_task['task']
-        env_globals.task_env.reset(full_task)
+        # env_globals.task_env.reset(full_task)
+        self.env_interface.reset(full_task)
 
     """
     Decision procedures: Pick which actions to take
@@ -121,11 +125,7 @@ class BaseAgent:
         pass
 
     def train_loop(self):
-        while True:
-            # setup
-            if self.train_iter >= self.max_train_iter:
-                print("max train iter reached")
-                break
+        for i in tqdm(range(self.train_iter, self.max_train_iter), leave=False):
             logger.info(f'[train iter]: {self.train_iter}/{self.max_train_iter} \n')
 
             # fill ids first for logging before task reset (eg curriculum still deciding task)
@@ -136,8 +136,8 @@ class BaseAgent:
             self.train_step()
 
             # postprocessing
-            task_folder = construct_task_folder(self.args['result_dir'], 'train', self.task_id)
-            move_log_file(f"{task_folder}/logfile.log", self.args['result_dir'])
+            task_folder = construct_task_folder(self.result_dir, 'train', self.task_id)
+            move_log_file(f"{task_folder}/logfile.log", self.result_dir)
 
             self.train_iter += 1
             train_ckpt(self)

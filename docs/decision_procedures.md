@@ -30,13 +30,13 @@ The decision procedure is a set of methods that the agent uses to propose, evalu
 
 ## Example Usage
 
-Here is an example of how to use the `CoalaDecisionCycle` class:
+Here is an example of how to use the `BaseCoalaDecisionCycle` class:
 
 ```python
-from cognitive_base.decision_procedures.coala_decision_cycle import CoalaDecisionCycle
+from cognitive_base.decision_procedures.base_coala_decision_cycle import BaseCoalaDecisionCycle
 
 
-class MyDecisionCycle(CoalaDecisionCycle):
+class MyDecisionCycle(BaseCoalaDecisionCycle):
     def observation_phase(self, data):
         # Custom observation logic
         return data

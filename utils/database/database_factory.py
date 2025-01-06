@@ -10,7 +10,7 @@ Functions:
 # TODO:
     - Integrate support for PGVector database, which requires a connection string and additional setup for use with PostgreSQL.
     - Explore and add support for other database types as needed, ensuring they can be integrated with the common interface provided by DatabaseWrapper.
-
+# TODO: slowly deprecate this for new design
 """
 
 from langchain.vectorstores import Chroma
@@ -22,12 +22,12 @@ from ...utils import f_mkdir
 
 
 def get_database(
-        vectordb_name: str = 'base',
-        ckpt_dir: str = 'ckpt',
-        db_type: str = 'chroma',
-        collection_name: str = '',
-        persist_directory: str = '',
-        **kwargs
+    vectordb_name: str = 'base',
+    ckpt_dir: str = 'ckpt',
+    db_type: str = 'chroma',
+    collection_name: str = '',
+    persist_directory: str = '',
+    **kwargs
 ):
     """
     Creates and returns a langchain vector database instance wrapped in a DatabaseWrapper for a common interface.

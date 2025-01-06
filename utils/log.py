@@ -3,10 +3,14 @@ import logging
 import time
 import random
 import os
+import logging
+import traceback
+
 from pathlib import Path
 
 from . import dump_json, lm_cache_init
 
+logger = logging.getLogger("logger")
 
 def setup_extra_file_handler(logger, extra_log_file_name):
     """
@@ -178,3 +182,26 @@ def setup_base_dirs(args, log_file_name):
 def setup_logging_n_base_dirs_old(args):
     log_file_name = setup_logging(args.log_folder)
     setup_base_dirs(args, log_file_name)
+
+
+def handle_rollout_error(e, task_id, result_dir):
+    """
+    Handles errors that occur during a rollout process by logging the error and writing it to a file.
+
+    Args:
+        e (Exception): The exception that was raised.
+        task_id (str): The identifier of the task during which the error occurred.
+        result_dir (str or Path): The directory where the error log file should be saved.
+
+    Logs:
+        Logs the error message and traceback using the logger.
+
+    Writes:
+        Writes the error message and traceback to a file named "error.txt" in the specified result directory.
+    """
+    unhandled_error_str = f"[task_id]: {task_id} [Unhandled Error] {repr(e)}\n"
+    error_trace = traceback.format_exc()
+    logger.error(f"error in rollout.\n{unhandled_error_str}\n{error_trace}")
+    with open(Path(result_dir) / "error.txt", "a") as f:
+        f.write(unhandled_error_str)
+        f.write(error_trace)

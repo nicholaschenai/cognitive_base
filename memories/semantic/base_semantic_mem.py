@@ -7,12 +7,12 @@ from ..base_mem import BaseMem
 
 class BaseSemanticMem(BaseMem):
     def __init__(
-            self,
-            retrieval_top_k=5,
-            ckpt_dir="ckpt",
-            vectordb_name="semantic",
-            resume=True,
-            **kwargs,
+        self,
+        retrieval_top_k=5,
+        ckpt_dir="ckpt",
+        vectordb_name="semantic",
+        resume=True,
+        **kwargs,
     ):
         super().__init__(
             retrieval_top_k=retrieval_top_k,
@@ -21,28 +21,15 @@ class BaseSemanticMem(BaseMem):
             resume=resume,
             **kwargs,
         )
-
+        
         self.knowledge_sources = []
-        self.reflections = []
+        
+        self.register_vectordb_with_methods('summaries')
+        self.register_vectordb_with_methods('reflections')
 
-    def add_knowledge_source(self, source):
-        """
-        Adds a knowledge source to the semantic memory.
-
-        Args:
-            source (dict): A dictionary containing information about the knowledge source.
-        """
-        self.knowledge_sources.append(source)
-
-    def add_reflection(self, reflection):
-        """
-        Adds a reflection or summary to the semantic memory.
-
-        Args:
-            reflection (dict): A dictionary containing information about the reflection or summary.
-        """
-        self.reflections.append(reflection)
-
+    """
+    Retrieval Actions (to working mem / decision procedure)
+    """
     def get_knowledge_sources(self):
         """
         Retrieves all knowledge sources from the semantic memory.
@@ -52,14 +39,83 @@ class BaseSemanticMem(BaseMem):
         """
         return self.knowledge_sources
 
-    def get_reflections(self):
+    def retrieve_summaries(self, query, **kwargs):
         """
-        Retrieves all reflections and summaries from the semantic memory.
+        Retrieves summaries from the vector database based on similarity to a text.
+
+        Args:
+            query: The query text.
+            **kwargs: Additional arguments passed to the retrieval method.
 
         Returns:
-            list: A list of dictionaries containing reflections and summaries.
+            Union[List[str], List[Tuple[str, float]]]: Either:
+                - A list of formatted strings with proper indentation
+                - A list of tuples (formatted_string, score) if scores were requested
         """
-        return self.reflections
+        return self._retrieve_and_format(query, 'summaries', 'Summary', **kwargs)
+
+    def retrieve_reflections(self, query, **kwargs):
+        """
+        Retrieves reflections from the vector database based on similarity to a text.
+
+        Args:
+            query: The query text.
+            **kwargs: Additional arguments passed to the retrieval method.
+
+        Returns:
+            Union[List[str], List[Tuple[str, float]]]: Either:
+                - A list of formatted strings with proper indentation
+                - A list of tuples (formatted_string, score) if scores were requested
+        """
+        return self._retrieve_and_format(query, 'reflections', 'Reflection', **kwargs)
+    
+    def retrieve_textbook(self, query, **kwargs):
+        """
+        Retrieves textbook reference material from the vector database and formats it with proper indentation.
+
+        Args:
+            query: The query text.
+            **kwargs: Additional arguments passed to the retrieval method.
+
+        Returns:
+            Union[List[str], List[Tuple[str, float]]]: Either:
+                - A list of formatted strings with proper indentation
+                - A list of tuples (formatted_string, score) if scores were requested
+        """
+        return self._retrieve_and_format(query, 'vector', 'Textbook Reference Material', **kwargs)
+
+    """
+    Learning Actions (from working mem)
+    """
+    def add_knowledge_source(self, source):
+        """
+        Adds a knowledge source to the semantic memory.
+
+        Args:
+            source (dict): A dictionary containing information about the knowledge source.
+        """
+        self.knowledge_sources.append(source)
+
+    def update_summaries(self, entry, **kwargs):
+        """
+        Stores an embedding in the summaries vector database.
+
+        Args:
+            entry: The embedding to store.
+            **kwargs: Additional arguments passed to the update method.
+        """
+        self.update_methods['summaries'].update(entry, **kwargs)
+
+    def update_reflections(self, entry, **kwargs):
+        """
+        Stores an embedding in the reflections vector database.
+
+        Args:
+            entry: The embedding to store.
+            **kwargs: Additional arguments passed to the update method.
+        """
+        self.update_methods['reflections'].update(entry, **kwargs)
+
 
 # TODO: merge below with above
 # from cognitive_base.utils.database.database_manager import DatabaseManager
@@ -67,16 +123,6 @@ class BaseSemanticMem(BaseMem):
 # class SemanticMemory:
 #     def __init__(self, vector_db_config, relational_db_path):
 #         self.db_manager = DatabaseManager(vector_db_config, relational_db_path)
-#
-#     def add_knowledge_source(self, vector, metadata):
-#         """
-#         Adds a knowledge source to the semantic memory.
-#
-#         Args:
-#             vector (list): The vector representation of the data.
-#             metadata (dict): Metadata associated with the vector.
-#         """
-#         self.db_manager.add_to_vector_db(vector, metadata)
 #
 #     def add_reflection(self, table_name, entry):
 #         """
@@ -87,19 +133,6 @@ class BaseSemanticMem(BaseMem):
 #             entry (dict): Dictionary containing column-value pairs.
 #         """
 #         self.db_manager.add_to_relational_db(table_name, entry)
-#
-#     def get_knowledge_sources(self, vector, top_k=10):
-#         """
-#         Retrieves knowledge sources from the semantic memory.
-#
-#         Args:
-#             vector (list): The vector to query.
-#             top_k (int): Number of top results to return.
-#
-#         Returns:
-#             list: List of top_k results.
-#         """
-#         return self.db_manager.query_vector_db(vector, top_k)
 #
 #     def get_reflections(self, table_name, query_conditions):
 #         """

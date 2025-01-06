@@ -15,13 +15,13 @@ class BaseProceduralMem(BaseMem):
     It also loads rules from a JSON file if the resume flag is set.
     """
     def __init__(
-            self,
-            scoring_strategy=JaccardScoringStrategy(),
-            retrieval_top_k=5,
-            ckpt_dir="ckpt",
-            vectordb_name="procedural",
-            resume=True,
-            **kwargs,
+        self,
+        scoring_strategy=JaccardScoringStrategy(),
+        retrieval_top_k=5,
+        ckpt_dir="ckpt",
+        vectordb_name="procedural",
+        resume=True,
+        **kwargs,
     ):
         super().__init__(
             retrieval_top_k=retrieval_top_k,
