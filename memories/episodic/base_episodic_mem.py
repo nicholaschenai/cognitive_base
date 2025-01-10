@@ -2,7 +2,7 @@ import copy
 
 from typing import Dict
 
-from ..base_mem import BaseMem
+from ..base_mem import BaseMem, conditional_memory_op
 
 from ...utils import load_json, dump_json
 
@@ -41,6 +41,9 @@ class BaseEpisodicMem(BaseMem):
             resume=resume,
             **kwargs,
         )
+
+        # ablations
+        self.is_enabled = not kwargs.get('disable_episodic', False)
 
         self.curr_episode = []
         self.transition_id = 0
@@ -110,6 +113,7 @@ class BaseEpisodicMem(BaseMem):
     """
     Retrieval Actions (to working mem / decision procedure)
     """
+    @conditional_memory_op
     def retrieve_transition(self, query, **kwargs):
         """Retrieve transitions based on similarity to query"""
         # return self.retrieve(query, **kwargs)
@@ -169,6 +173,7 @@ class BaseEpisodicMem(BaseMem):
     """
     Learning Actions (from working mem)
     """
+    @conditional_memory_op
     def add_transition(self, transition_data):
         """Add a transition to the current episode
         

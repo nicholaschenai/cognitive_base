@@ -47,6 +47,9 @@ class BaseMem:
         self.verbose = verbose
         self.debug_mode = debug_mode
 
+        # ablations
+        self.is_enabled = not kwargs.get('disable_memory', False)
+
         # params
         self.retrieval_top_k = retrieval_top_k
 
@@ -214,3 +217,11 @@ class BaseMem:
             db: The database where the embedding should be stored. If None, the default database is used.
         """
         self.update_ebd(entry, **kwargs)
+
+
+def conditional_memory_op(func):
+    def wrapper(self, *args, **kwargs):
+        if not self.is_enabled:
+            return [] if func.__name__.startswith('retrieve') else None
+        return func(self, *args, **kwargs)
+    return wrapper

@@ -13,9 +13,7 @@
 
 ### Installation
 
-TODO: Instructions on how to install the library.
-
-TODO: requirements
+See examples
 
 ## Documentation
 
@@ -40,3 +38,15 @@ The library is inspired by various cognitive architectures, including:
 
 ## Roadmap
 We aim to implement more of the features from the above references over time.
+
+We might also implement modules from "Building Machines That Learn and Think Like People"
+(Lake et. al. 2016) such as
+- Intuitive Physics module
+- Intuitive Psychology module
+- Causal world models
+- Compositionality
+
+The skills library in the Voyager coder example has elements of causal models 
+(LLM expected to choose skills in order) and compositionality 
+(LLM expected to compose new skills from existing skills).
+
